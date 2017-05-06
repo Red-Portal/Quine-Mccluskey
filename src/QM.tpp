@@ -1,6 +1,7 @@
 #ifndef QM_TPP
 #define QM_TPP
 
+#include "QM.hpp"
 
 // constructor for initialization using std::vectors
 // generate vectors of bits
@@ -42,7 +43,7 @@ QM::Reducer<_Size>::Reducer(std::array<int, _Size> const& minTerms_,
 template<size_t _Size>
 void QM::Reducer<_Size>::reduce()
 {
-  auto bitsByCount = std::array<TermsRef, _Size + 1>;
+  auto bitsByCount = std::array<std::vector<TermRef>, _Size + 1>();
 
   // seperating the bitsets by the number of 1s
   for(auto& it : _minTerms)
@@ -58,11 +59,11 @@ void QM::Reducer<_Size>::reduce()
 }
 
 template<size_t _Size>
-std::vector<std::pari<std::bitset<_Size>, bool>>
+std::vector<std::pair<std::bitset<_Size>, bool>>
 QM::Reducer<_Size>::findImplicants(std::vector<TermRef> const& first,
 				   std::vector<TermRef> const& second)
 {
-  auto result = MarkableTermsRef;
+  auto result = std::vector<std::pair<std::bitset<_Size>, bool>>();
   result.reserve(first.size() + second.size());
 
   for(auto const& i : first)
@@ -72,7 +73,7 @@ QM::Reducer<_Size>::findImplicants(std::vector<TermRef> const& first,
       auto xorMasked = i.get() ^ j.get();
 
       if(xorMasked.count() == 1)
-	result.emplace_back()
+	result.emplace_back( /* implement */);
     }
   }
 
