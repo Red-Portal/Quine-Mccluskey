@@ -14,11 +14,13 @@ namespace QM
   template<size_t _Size>
   class Reducer
   {
+    using TermRef = std::reference_wrapper<std::bitset<_Size>>;
+    
   private:
     std::vector<std::bitset<_Size>> _minTerms;
     std::vector<std::bitset<_Size>> _dTerms;
 
-    auto findImplicants(std::vector<std::reference_wrapper<std::bitset<_Size>>> const&)
+    auto findImplicants(std::vector<TermRef> const&, std::vector<TermRef> const&)
       -> std::vector<std::pair<std::bitset<_Size>, bool>>;
 
   public:
@@ -28,8 +30,8 @@ namespace QM
 		     std::array<int, _Size> const& dTerms);
     ~Reducer() = default;
 
-		void reduce();
-    };
+    void reduce();
+  };
 }
 
 

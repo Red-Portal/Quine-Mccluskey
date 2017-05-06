@@ -58,9 +58,9 @@ void QM::Reducer<_Size>::reduce()
 }
 
 template<size_t _Size>
-std::vector<MarkableTermsRef>
-QM::Reducer<_Size>::findImplicants(TermsRef const& first,
-				   TermsRef const& second)
+std::vector<std::pari<std::bitset<_Size>, bool>>
+QM::Reducer<_Size>::findImplicants(std::vector<TermRef> const& first,
+				   std::vector<TermRef> const& second)
 {
   auto result = MarkableTermsRef;
   result.reserve(first.size() + second.size());
