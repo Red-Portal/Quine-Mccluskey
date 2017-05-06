@@ -6,7 +6,5 @@ set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES
         src/main.cpp
         src/QM.h
-        src/QM.cpp
-        src/Term.h
-        src/Term.cpp)
+        src/QM.tpp)
 add_executable(QuineMccluskey ${SOURCE_FILES})
