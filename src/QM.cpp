@@ -2,20 +2,20 @@
 #define QM_TPP
 
 #include "QM.hpp"
+#include "bitset.hpp"
 
 // constructor for initialization using std::vectors
 // generate vectors of bits
-template<size_t _Size>
-QM::Reducer<_Size>::Reducer(std::vector<int> const& minTerms_,
+QM::Reducer::Reducer(std::vector<int> const& minTerms_,
 			    std::vector<int> const& dTerms_)
 {
   _minTerms.reserve(minTerms_.size());
   _dTerms.reserve(dTerms_.size());
 
   for (auto const& it : minTerms_)
-    _minTerms.emplace_back(std::bitset<_Size>(static_cast<unsigned long>(it)));
+    _minTerms.emplace_back(bitset(static_cast<unsigned long>(it)));
   for (auto const& it : dTerms_)
-    _dTerms.emplace_back(std::bitset<_Size>(static_cast<unsigned long>(it)));
+    _dTerms.emplace_back(bitset(static_cast<unsigned long>(it)));
 
   _minTerms.shrink_to_fit();
   _dTerms.shrink_to_fit();
@@ -23,9 +23,8 @@ QM::Reducer<_Size>::Reducer(std::vector<int> const& minTerms_,
 
 // constructor for initialization using std::arrays
 // generate vectors of bits
-template<size_t _Size>
-QM::Reducer<_Size>::Reducer(std::array<int, _Size> const& minTerms_,
-			    std::array<int, _Size> const& dTerms_)
+QM::Reducer::Reducer(int* const minTerms_,
+		     int* const dTerms_)
 {
   _minTerms.reserve(minTerms_.size());
   _dTerms.reserve(dTerms_.size());
@@ -40,8 +39,7 @@ QM::Reducer<_Size>::Reducer(std::array<int, _Size> const& minTerms_,
 }
 
 // start boolean reduction using quine-mccluskey method
-template<size_t _Size>
-void QM::Reducer<_Size>::reduce()
+void QM::Reducer::reduce()
 {
   auto bitsByCount = std::array<std::vector<TermRef>, _Size + 1>();
 
@@ -58,9 +56,8 @@ void QM::Reducer<_Size>::reduce()
     findImplicants(*it, *(it + 1));
 }
 
-template<size_t _Size>
-std::vector<std::pair<std::bitset<_Size>, bool>>
-QM::Reducer<_Size>::findImplicants(std::vector<TermRef> const& first,
+std::vector<std::pair<bitset, bool>>
+QM::Reducer::findImplicants(std::vector<TermRef> const& first,
 				   std::vector<TermRef> const& second)
 {
   auto result = std::vector<std::pair<std::bitset<_Size>, bool>>();
