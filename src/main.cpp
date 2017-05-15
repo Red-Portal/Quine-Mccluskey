@@ -1,5 +1,6 @@
-#include "Term.hpp"
 #include <iostream>
+
+#include "Term.hpp"
 
 int main( int argc, char** argv)
 {
@@ -8,8 +9,8 @@ int main( int argc, char** argv)
     //std::vector<int> dTerms = {9, 14};
 
 	auto term = QM::Term(4, 3);
-
-	std::cout << term.getNumberOfOnes() << std::endl;
+	if(term.getNumberOfOnes() == 2)
+		std::cout << "Passed computing numberOfOnes Test";
 
     return 0;
 }
