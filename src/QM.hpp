@@ -4,35 +4,36 @@
 
 #include <vector>
 #include <array>
-#include <bitset>
 #include <cstdlib>
+#include <initializer_list>
 #include <functional>
+
+#include "Term.hpp"
 
 namespace QM
 {
+	class Reducer
+	{
+	private:
+		std::vector<Term> _minTerms;
+		std::vector<Term> _dTerms;
+		size_t const _inputNum;
 
-  class bitset;
+		auto findImplicants(std::vector<Term> const&,
+							std::vector<Term> const& );
 
-  class Reducer
-  {
-    using TermRef = std::reference_wrapper<bitset>;
-    
-  private:
-    size_t _SIZE;
-    std::vector<bitset> _minTerms;
-    std::vector<bitset> _dTerms;
+	public:
+		explicit Reducer(int inputNum,
+						 std::vector<int> const& minTerms,
+						 std::vector<int> const& dTerms);
 
-    auto findImplicants(std::vector<TermRef> const&, std::vector<TermRef> const&)
-      -> std::vector<std::pair<bitset, bool>>;
+		explicit Reducer(int inputNum,
+						 std::initializer_list<int> const& minTerms,
+						 std::initializer_list<int> const& dTerms);
 
-  public:
-    explicit Reducer(std::vector<int> const& minTerms,
-		     std::vector<int> const& dTerms);
-    explicit Reducer(int* const minTerms,
-		     int* const dTerms);
-    ~Reducer() = default;
+		~Reducer() = default;
 
-    void reduce();
-  };
+		void reduce();
+	};
 }
 #endif
