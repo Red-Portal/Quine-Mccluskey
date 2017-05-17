@@ -71,10 +71,16 @@ namespace QM
 
 		if(result > 0 && result % 2 == 0)
 		{
-			_checked = false;
-			other._checked = false;
+			auto masked = ~(result & _xMask);
+			if(masked > 0)
+			{
+				_checked = false;
+				other._checked = false;
 
-			return std::make_unique(Term(*this, result));
+				return std::make_unique(Term(*this, _xMask | result));
+			}
+			else
+				return nullptr;
 		}	
 		else
 			return nullptr;
