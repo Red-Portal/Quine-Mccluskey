@@ -24,7 +24,7 @@ namespace QM
 		inline Term(Term<BitArray>&& other) = default;
 		inline Term(Term<BitArray> const& other) = default;
 		inline Term(size_t size, BitArray term);
-		inline Term(size_t size, BitArray term, BitArray mask);
+		inline Term(Term<BitArray> const& other, BitArray mask);
 		inline Term<BitArray>& operator=(Term const& other) = default;
 		inline Term<BitArray>& operator=(Term&& other) = default;
 		~Term() = default;
@@ -41,7 +41,7 @@ namespace QM
 		:_size(size),
 		 _bitArray(term),
 		 _numberOfOne(0),
-		 _checked(false),
+		 _checked(true),
 		 _xMask(0)
 	{
 		BitArray end = 1 << size;
@@ -54,20 +54,14 @@ namespace QM
 
 
 	template<typename BitArray>
-	inline Term<BitArray>::Term(size_t size, BitArray term, BitArray mask)
-		:_size(size),
-		 _bitArray(term),
-		 _numberOfOne(0),
-		 _checked(false),
+	inline Term<BitArray>::Term(Term<BitArray> const& other,
+								BitArray mask)
+		:_size(other._size),
+		 _bitArray(other._size),
+		 _numberOfOne(other._numberOfOne),
+		 _checked(true),
 		 _xMask(mask)
-	{
-		BitArray end = 1 << size;
-		for(BitArray it = 1; it != end; it <<= 1)
-		{
-			if(_bitArray & it)
-				++_numberOfOne;
-		}
-	}
+	{}
 
 	template<typename BitArray>
 	std::unique_ptr<Term<BitArray>> Term<BitArray>::compareIfImplicant(Term &other)
@@ -77,8 +71,11 @@ namespace QM
 
 		if(result > 0 && result % 2 == 0)
 		{
-			
-		}
+			_checked = false;
+			other._checked = false;
+
+			return std::make_unique(Term(*this, result));
+		}	
 		else
 			return nullptr;
 	}
