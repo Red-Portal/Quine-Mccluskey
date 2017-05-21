@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.6)
 project(QuineMccluskey)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
+
+## find_package(Threads REQUIRED)
+
 
 # GTEST paths
 add_subdirectory(googletest/googletest)
@@ -21,7 +25,8 @@ set(SOURCE_FILES
 # test project sourcefiles
 set(TEST_SOURCE_FILES
   ${SOURCE_FILES}
-  test/main.cpp)
+  test/main.cpp
+  test/TermTest.cpp)
 
 # project executable
 ## add_executable(QuineMccluskey ${SOURCE_FILES})
