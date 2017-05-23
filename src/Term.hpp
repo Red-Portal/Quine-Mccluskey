@@ -20,17 +20,12 @@ namespace QM
 		BitArray _xMask;
 
 	public:
-		inline Term() = default;
-		inline Term(Term<BitArray>&& other) = default;
-		inline Term(Term<BitArray> const& other) = default;
 		inline Term(size_t size, BitArray term);
 		inline Term(Term<BitArray> const& other, BitArray mask);
-		inline Term<BitArray>& operator=(Term const& other) = default;
-		inline Term<BitArray>& operator=(Term&& other) = default;
 		~Term() = default;
 
 		std::unique_ptr<Term<BitArray>> compareIfImplicant(Term& other);
-		inline int getNumberOfOnes() const;
+		inline int getSetBitNum() const;
 		inline bool isChecked() const;
 	};
 
@@ -38,10 +33,10 @@ namespace QM
 
 	template<typename BitArray>
 	inline Term<BitArray>::Term(size_t size, BitArray term)
-		:_size(size),
-		 _bitArray(term),
-		 _numberOfOne(0),
+		:_numberOfOne(0),
 		 _checked(true),
+		 _size(size),
+		 _bitArray(term),
 		 _xMask(0)
 	{
 		BitArray end = 1 << size;
@@ -56,38 +51,42 @@ namespace QM
 	template<typename BitArray>
 	inline Term<BitArray>::Term(Term<BitArray> const& other,
 								BitArray mask)
-		:_size(other._size),
-		 _bitArray(other._size),
-		 _numberOfOne(other._numberOfOne),
+		:_numberOfOne(other._numberOfOne),
 		 _checked(true),
+		 _size(other._size),
+		 _bitArray(other._bitArray),
 		 _xMask(mask)
 	{}
 
 	template<typename BitArray>
-	std::unique_ptr<Term<BitArray>> Term<BitArray>::compareIfImplicant(Term &other)
+	std::unique_ptr<Term<BitArray>> Term<BitArray>::compareIfImplicant(Term<BitArray> &other)
 	{
-		auto result = _bitArray ^ other._bitArray; //XOR operation
+		if(_xMask != other._xMask)
+			return nullptr;
+
+		auto preMasked = _bitArray ^ other._bitArray; //XOR operation
+		auto result = preMasked & ~_xMask;
+
 		// if the result has only one '1' then it's an implicant
 
-		if(result > 0 && result % 2 == 0)
-		{
-			auto masked = ~(result & _xMask);
-			if(masked > 0)
-			{
-				_checked = false;
-				other._checked = false;
+		//std::cout << "preMasked: " << preMasked  << std::endl;
+		//std::cout << "result: " << result << std::endl;
 
-				return std::make_unique(Term(*this, _xMask | result));
-			}
-			else
-				return nullptr;
+		if(result != 0U && result && !(result & (result - 1)))
+		{
+			this->_checked = false;
+			other._checked = false;
+
+			auto newMask = result | _xMask;
+
+			return std::make_unique<Term<BitArray>>(Term(*this, newMask));
 		}	
 		else
 			return nullptr;
 	}
 
 	template<typename BitArray>
-	inline int Term<BitArray>::getNumberOfOnes() const
+	inline int Term<BitArray>::getSetBitNum() const
 	{
 		return _numberOfOne;
 	}
@@ -99,7 +98,4 @@ namespace QM
 		return _checked;
 	}
 }
-
-
-
 #endif

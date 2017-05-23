@@ -4,9 +4,6 @@ project(QuineMccluskey)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 
-## find_package(Threads REQUIRED)
-
-
 # GTEST paths
 add_subdirectory(googletest/googletest)
 enable_testing()
@@ -18,14 +15,13 @@ include_directories(${GTEST_LIBS_DIR}/include)
 # project SourceFiles
 set(SOURCE_FILES
   src/Term.hpp
-  #src/QM.hpp
-  #src/QM.cpp
-)
+  src/QM.hpp)
 
 # test project sourcefiles
 set(TEST_SOURCE_FILES
   ${SOURCE_FILES}
   test/main.cpp
+  test/QMTest.cpp
   test/TermTest.cpp)
 
 # project executable
