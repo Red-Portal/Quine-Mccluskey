@@ -5,8 +5,6 @@
 #include <memory>
 #include <cstdlib>
 
-//#include <iostream>
-
 namespace QM
 {
     template<typename BitArray>
@@ -31,7 +29,7 @@ namespace QM
         inline Term& operator=(Term const& other) = default;
         ~Term() = default;
 
-        inline bool isGreyAdjacent(Term& other);
+        inline bool isGrayAdjacent(Term& other);
         inline Term<BitArray> getGroupedTerm(Term& other);
         inline bool operator==(Term const& other) const;
         inline bool operator!=(Term const& other) const;
@@ -84,7 +82,7 @@ namespace QM
     }
 
     template<typename BitArray>
-    bool Term<BitArray>::isGreyAdjacent(Term<BitArray> &other)
+    bool Term<BitArray>::isGrayAdjacent(Term<BitArray> &other)
     {
         if(_xMask != other._xMask)
             return false;

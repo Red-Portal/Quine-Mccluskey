@@ -52,7 +52,7 @@ TEST(TermCompareTest, NothingInCommon)
     auto termFirst = QM::Term<uint64_t>(4, 3);
     auto termSecond = QM::Term<uint64_t>(4, 4);
 
-    auto ptr = termFirst.isGreyAdjacent(termSecond);
+    auto ptr = termFirst.isGrayAdjacent(termSecond);
 
     EXPECT_FALSE(ptr);
 }
@@ -64,7 +64,7 @@ TEST(TermCompareTest, CompareResultMaskedoff)
     auto termMask = QM::Term<uint64_t>(term, tempTerm, 1); //001X
     auto termSecond = QM::Term<uint64_t>(4, 2);
 
-    auto ptr = termMask.isGreyAdjacent(termSecond);
+    auto ptr = termMask.isGrayAdjacent(termSecond);
 
     EXPECT_FALSE(ptr);
 }
@@ -74,7 +74,7 @@ TEST(TermCompareTest, CompareResultImplicant)
     auto termFirst = QM::Term<uint64_t>(4, 1); // 0001
     auto termSecond = QM::Term<uint64_t>(4, 9); // 1001
 
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond)); // X001
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond)); // X001
 
     auto ptr = termFirst.getGroupedTerm(termSecond);
 
@@ -93,17 +93,17 @@ TEST(TermCompareTest, CompareResultImplicantFromImplicant)
     auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
     auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
 
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond));
     auto ptr = termFirst.getGroupedTerm(termSecond); // 001X
 
     auto termThird = QM::Term<uint64_t>(4, 10); // 1010
     auto termTemp = QM::Term<uint64_t>(4, 11); // 1011
     auto termThirdMasked = QM::Term<uint64_t>(termThird, termTemp, 1); //101X
 
-    EXPECT_TRUE(ptr.isGreyAdjacent(termThirdMasked));
+    EXPECT_TRUE(ptr.isGrayAdjacent(termThirdMasked));
     auto resultPtr = ptr.getGroupedTerm(termThirdMasked); // X01X
 
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond)); // X001
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond)); // X001
     ptr = termFirst.getGroupedTerm(termSecond);
 
     EXPECT_FALSE(termFirst.isChecked());
@@ -126,8 +126,8 @@ TEST(TermCompareTest, ComparingMasks)
     auto termMaskedFirst = QM::Term<uint64_t>(termFirst, termThird, 4); // 0X11
     auto termMaskedSecond = QM::Term<uint64_t>(termSecond, termFourth, 8); // X010
 
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
-    EXPECT_FALSE(termMaskedFirst.isGreyAdjacent(termMaskedSecond));
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond));
+    EXPECT_FALSE(termMaskedFirst.isGrayAdjacent(termMaskedSecond));
 }
 
 
@@ -136,7 +136,7 @@ TEST(TermCompareTest, MintermStacking)
     auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
     auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
 
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond));
     auto child = termFirst.getGroupedTerm(termSecond);
 
     EXPECT_EQ(child._minTerm[0], 3u);
@@ -149,7 +149,7 @@ TEST(TermResultTest, getEquation)
     auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
     auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
     
-    EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+    EXPECT_TRUE(termFirst.isGrayAdjacent(termSecond));
     auto child = termFirst.getGroupedTerm(termSecond);
 
     auto result = child.getEquation(); // 001X

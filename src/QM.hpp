@@ -169,7 +169,7 @@ namespace QM
         {
             for(auto j = second.begin(); j != second.end(); ++j)
             {
-                if(i->isGreyAdjacent(*j))
+                if(i->isGrayAdjacent(*j))
                 {
                     auto ret = i->getGroupedTerm(*j);
                     set.insert(ret);
