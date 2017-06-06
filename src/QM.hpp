@@ -6,7 +6,11 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <functional>
+#include <algorithm>
 #include <unordered_map>
+#include <set>
+
+#include <iostream>
 
 #include "Term.hpp"
 
@@ -16,29 +20,35 @@ namespace QM
 	class Reducer
 	{
 	private:
-		using TermUniquePtrVector = std::vector<std::unique_ptr<Term<BitArray>>>;
+		using TermVector = std::vector<Term<BitArray>>;
 
-		TermUniquePtrVector _minTerms;
-		TermUniquePtrVector _dTerms;
 		size_t const _inputNum;
 
-		inline auto computeBySetBits(std::unordered_map<int, TermUniquePtrVector>& map);
-		inline auto computeImplicant(TermUniquePtrVector& first, TermUniquePtrVector& second);
+		inline auto computeByNumberOfSetBits(
+			std::unordered_map<BitArray, TermVector>& map) const;
+
+		inline auto computeImplicant(TermVector& first,
+									 TermVector& second) const;
+
+		inline auto getImplicants(
+			std::unordered_map<BitArray, TermVector> const&) const;
+
+		inline auto reduce(TermVector const& mTerms, TermVector const& dTerms) const;
+
+		inline auto select(TermVector const& implicants, TermVector const& mTerms) const;
+
+		inline void setResult(TermVector const& implicants);
+
 	public:
 		template<typename T>
 		inline explicit Reducer(int inputNum,
-						 std::vector<T> const& minTerms,
-						 std::vector<T> const& dTerms);
+								std::vector<T> const& minTerms,
+								std::vector<T> const& dTerms);
 		template<typename T>
 		inline explicit Reducer(int inputNum,
-						 std::initializer_list<T> const& minTerms,
-						 std::initializer_list<T> const& dTerms);
+								std::initializer_list<T> const& minTerms,
+								std::initializer_list<T> const& dTerms);
 		~Reducer() = default;
-
-		inline Reducer& operator=(Reducer const&);
-		inline Reducer(Reducer const&);
-
-		void reduce();
 	};
 
 
@@ -47,19 +57,22 @@ namespace QM
 	Reducer<BitArray>::Reducer(int inputNum,
 							   std::vector<T> const& minTerms,
 							   std::vector<T> const& dTerms)
-		:_minTerms(),
-		 _dTerms(),
-		 _inputNum(inputNum)
+		:_inputNum(inputNum)
 	{
-		_minTerms.reserve(minTerms.size());
-		_dTerms.reserve(dTerms.size()); 
+		TermVector mTerms_;
+		TermVector dTerms_;
+
+		mTerms_.reserve(minTerms.size());
+		dTerms_.reserve(dTerms.size()); 
 
 		for (auto it : minTerms)
-			_minTerms.emplace_back(new Term<BitArray>(_inputNum,
-													  static_cast<BitArray>(it)));
+			mTerms_.emplace_back(Term<BitArray>(inputNum, it));
 		for (auto it : dTerms)
-			_dTerms.emplace_back(new Term<BitArray>(_inputNum,
-			static_cast<BitArray>(it)));
+			dTerms_.emplace_back(Term<BitArray>(inputNum, it));
+
+		auto implicants = reduce(mTerms_, dTerms_);
+		auto primeImpl = select(implicants, mTerms_);
+		setResult(primeImpl);
 	}
 
 	template<typename BitArray>
@@ -67,113 +80,188 @@ namespace QM
 	Reducer<BitArray>::Reducer(int inputNum,
 							   std::initializer_list<T> const& minTerms,
 							   std::initializer_list<T> const& dTerms)
-		: _minTerms(),
-		  _dTerms(),
-		  _inputNum(inputNum)
+		: _inputNum(inputNum)
 	{
-		_minTerms.reserve(minTerms.size());
-		_dTerms.reserve(dTerms.size());
+		TermVector mTerms_;
+		TermVector dTerms_;
+
+		mTerms_.reserve(minTerms.size());
+		dTerms_.reserve(dTerms.size());
 
 		for (auto it : minTerms)
-			_minTerms.emplace_back(new Term<BitArray>(_inputNum,
-													  static_cast<BitArray>(it)));
+			mTerms_.emplace_back(Term<BitArray>(inputNum, it));
 		for (auto it : dTerms)
-			_dTerms.emplace_back(new Term<BitArray>(_inputNum,
-			static_cast<BitArray>(it)));
-	}
+			dTerms_.emplace_back(Term<BitArray>(inputNum, it));
 
-
-	template<typename BitArray>
-	Reducer<BitArray>& Reducer<BitArray>::operator=(Reducer<BitArray> const& other)
-	{
-		_minTerms.clear();
-		_dTerms.clear();
-
-		for(auto const& it : other._minTerms)
-			_minTerms.push_back(std::make_unique<Term<BitArray>>(*it));
-		for(auto const& it : other._dTerms)
-			_dTerms.push_back(std::make_unique<Term<BitArray>>(*it));
-
-		return *this;
+		auto implicants = reduce(mTerms_, dTerms_);
+		auto primeImpl = select(implicants, mTerms_);
+		setResult(primeImpl);
 	}
 
 	template<typename BitArray>
-	Reducer<BitArray>::Reducer(Reducer<BitArray> const& other)
-		: _minTerms(),
-		  _dTerms(),
-		  _inputNum(other._inputNum)
+	auto Reducer<BitArray>::reduce(TermVector const& mTerms,
+								   TermVector const& dTerms) const
 	{
-		for(auto const& it : other._minTerms)
-			_minTerms.push_back(std::make_unique<Term<BitArray>>(*it));
-		for(auto const& it : other._dTerms)
-			_dTerms.push_back(std::make_unique<Term<BitArray>>(*it));
-	}
-
-	template<typename BitArray>
-	void Reducer<BitArray>::reduce()
-	{
-		std::vector<std::unordered_map<int, TermUniquePtrVector>> termsByBitCount;
+		std::vector<std::unordered_map<BitArray, TermVector>> byImplicantSize;
+		TermVector result;
+		result.reserve(mTerms.size() + dTerms.size());
 
 		// seperating the bitsets by the number of 1s
+		byImplicantSize.emplace_back(std::unordered_map<BitArray, TermVector>());
+		auto& sizeZero = byImplicantSize.front();
 
-		termsByBitCount.emplace_back(std::unordered_map<int, TermUniquePtrVector>());
+		for(auto& it : mTerms)
+			sizeZero[it.getSetBitNum()].push_back(it);
+		for(auto& it : dTerms)
+			sizeZero[it.getSetBitNum()].push_back(it);
 
-		for(auto&& it : _minTerms)
-			termsByBitCount[0][it.getSetBitCount()].push_back(std::move(it));
-		for(auto&& it : _dTerms)
-			termsByBitCount[0][it.getSetBitCount()].push_back(std::move(it));
-
-		for(auto it = termsByBitCount.begin(); it != termsByBitCount.end(); ++it)
+		for(BitArray idx = 0; idx < byImplicantSize.size(); ++idx)
 		{
-			auto result = findImplicants(*it);
+			auto implicant = computeByNumberOfSetBits(byImplicantSize[idx]);
 
-			if(result.empty())
+			if(implicant.empty())
 				continue;
-			else
-				termsByBitCount.push_back(std::move(result));
-		}
-		
-		/*	
-		// compare the terms which have n, n+1 numbers of '1's
-		auto end = _inputNum - 1;
-		for(auto it = 0; it < end; ++it)
-		{
-			if(termsByBitCount.count(it) <= 0 || termsByBitCount.count(it + 1) <= 0)
-				continue;
-			
-			auto result = findImplicants(termsByBitCount[it], termsByBitCount[it + 1]);
-			}*/
-	}
 
-	template<typename BitArray>
-	auto Reducer<BitArray>::computeBySetBits(std::unordered_map<int, TermUniquePtrVector>& map)
-	{
-		std::unordered_map<int, TermUniquePtrVector> result;
+			byImplicantSize.push_back(std::move(implicant));
+		} 
 
-		auto end = _inputNum;
-		for(auto i = 0; i < end; ++i)
+		for(auto& i : byImplicantSize)
 		{
-			result[i] = computeImplicant(map[i], map[i+1]); 
+			auto realImp = getImplicants(i);
+			result.insert(result.end(),
+						  std::make_move_iterator(realImp.begin()),
+						  std::make_move_iterator(realImp.end()));
 		}
+
 		return result;
 	}
 
 	template<typename BitArray>
-	auto Reducer<BitArray>::computeImplicant(TermUniquePtrVector& first,
-											 TermUniquePtrVector& second)
+	auto Reducer<BitArray>::computeByNumberOfSetBits(std::unordered_map<BitArray, TermVector>& map) const
 	{
-		TermUniquePtrVector vec;
-		for(auto i = vec.begin(); i != vec.end(); ++i)
+		std::unordered_map<BitArray, TermVector> result;
+
+		for(BitArray i = 0; i < _inputNum; ++i)
 		{
-			for(auto j = i; j != vec.end(); ++j)
+			auto first = map.find(i);
+			if(first == map.end())
+				continue;
+
+			auto second = map.find(i+1);
+			if(second == map.end())
+				continue;
+
+			result[i] = computeImplicant(first->second,
+										 second->second);
+		}
+
+		return result;
+	}
+
+	template<typename BitArray>
+	auto Reducer<BitArray>::computeImplicant(TermVector& first,
+											 TermVector& second) const
+	{
+		std::set<Term<BitArray>> set;
+
+		for(auto i = first.begin(); i != first.end(); ++i)
+		{
+			for(auto j = second.begin(); j != second.end(); ++j)
 			{
-				auto ret = (*i)->compareIfImplicant(**j);
-				if(ret != nullptr)
-					vec.push_back(std::move(ret));
+				if(i->isGreyAdjacent(*j))
+				{
+					auto ret = i->getGroupedTerm(*j);
+					set.insert(ret);
+				}
+			}
+		}
+		return TermVector(set.begin(), set.end());
+	}
+
+	template<typename BitArray>
+	auto Reducer<BitArray>::getImplicants(std::unordered_map<BitArray, TermVector> const& map) const
+	{
+		TermVector result;
+		for(auto& i : map)
+		{
+			if(i.second.size() == 0)
+				continue;
+			
+			for(auto& j : i.second)
+			{
+				if(j.isChecked())
+					result.push_back(std::move(j));
 			}
 		}
 
-		return vec;
+		return result;
+	}
+
+	template<typename BitArray>
+	auto Reducer<BitArray>::select(TermVector const& implicants,
+								   TermVector const& mTerms) const
+	{
+		std::unordered_map<BitArray, std::vector<Term<BitArray> const*>> chart;
+		std::unordered_map<Term<BitArray> const*, bool> implicantsCheckList; 
+		std::set<Term<BitArray>> result;
+
+		for(auto& i : implicants)
+		{
+			implicantsCheckList[&i] = false;
+
+			for(auto& j : i._minTerm)
+			{
+				chart[j].push_back(&i);
+			}
+		}
+
+		// selection of prime implicants
+		for(auto& i : chart)
+		{
+			if(i.second.size() == 1)
+			{
+				result.emplace(*(i.second.front()));
+				implicantsCheckList[i.second.front()] = true;
+			}
+		}
+
+		// selection of non-prime implicants
+		for(auto& i : chart)
+		{
+			if(i.second.size() > 1)
+			{
+				// j is a pointer
+				for(auto j : i.second)
+				{
+					if(result.find(*j) != result.end())
+					{
+						result.emplace(*j);
+						goto OUT;
+					}
+				}
+
+				for(auto j : i.second)
+				{
+					
+					if(implicantsCheckList[j] != true)
+					{
+						result.emplace(*j);
+						break;
+					}
+				}
+			}
+
+		OUT:
+			;
+		}
+
+		return TermVector(result.begin(), result.end());
+	}
+
+	template<typename BitArray>
+	void Reducer<BitArray>::setResult(TermVector const& implicants)
+	{
+		
 	}
 }
 #endif

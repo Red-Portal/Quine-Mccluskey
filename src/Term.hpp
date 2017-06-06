@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstdlib>
 
-#include <iostream>
+//#include <iostream>
 
 namespace QM
 {
@@ -18,15 +18,28 @@ namespace QM
 		size_t _size;
 		BitArray _bitArray;
 		BitArray _xMask;
+		BitArray _result;
+		std::vector<BitArray> _minTerm;
 
 	public:
 		inline Term(size_t size, BitArray term);
-		inline Term(Term<BitArray> const& other, BitArray mask);
+		inline Term(Term<BitArray> const& first,
+					Term<BitArray> const& second,
+					BitArray mask);
+		inline Term(Term const&) = default;
+		inline Term(Term&&) noexcept = default;
+		inline Term& operator=(Term const& other) = default;
 		~Term() = default;
 
-		std::unique_ptr<Term<BitArray>> compareIfImplicant(Term& other);
+		inline bool isGreyAdjacent(Term& other);
+		inline Term<BitArray> getGroupedTerm(Term& other);
+		inline bool operator==(Term const& other) const;
+		inline bool operator!=(Term const& other) const;
+		inline bool operator<(Term const& oter) const;
+
 		inline int getSetBitNum() const;
 		inline bool isChecked() const;
+		inline auto const& getMinterms() const;
 	};
 
 
@@ -37,7 +50,8 @@ namespace QM
 		 _checked(true),
 		 _size(size),
 		 _bitArray(term),
-		 _xMask(0)
+		 _xMask(0),
+		 _result(0)
 	{
 		BitArray end = 1 << size;
 		for(BitArray it = 1; it != end; it <<= 1)
@@ -45,44 +59,49 @@ namespace QM
 			if(_bitArray & it)
 				++_numberOfOne;
 		}
+		_minTerm.push_back(term);
 	}
 
 
 	template<typename BitArray>
-	inline Term<BitArray>::Term(Term<BitArray> const& other,
+	inline Term<BitArray>::Term(Term<BitArray> const& first,
+								Term<BitArray> const& second,
 								BitArray mask)
-		:_numberOfOne(other._numberOfOne),
+		:_numberOfOne(first._numberOfOne),
 		 _checked(true),
-		 _size(other._size),
-		 _bitArray(other._bitArray),
-		 _xMask(mask)
-	{}
+		 _size(first._size),
+		 _bitArray(first._bitArray),
+		 _xMask(mask),
+		 _result(0)
+	{
+		_minTerm.insert(_minTerm.end(),
+						first._minTerm.begin(),
+						first._minTerm.end());
+		_minTerm.insert(_minTerm.end(),
+						second._minTerm.begin(),
+						second._minTerm.end());
+	}
 
 	template<typename BitArray>
-	std::unique_ptr<Term<BitArray>> Term<BitArray>::compareIfImplicant(Term<BitArray> &other)
+	bool Term<BitArray>::isGreyAdjacent(Term<BitArray> &other)
 	{
 		if(_xMask != other._xMask)
-			return nullptr;
+			return false;
 
-		auto preMasked = _bitArray ^ other._bitArray; //XOR operation
-		auto result = preMasked & ~_xMask;
+		_result = (_bitArray ^ other._bitArray) & ~_xMask; //XOR operation
 
-		// if the result has only one '1' then it's an implicant
+		return _result && !(_result & (_result - 1));
+	}
 
-		//std::cout << "preMasked: " << preMasked  << std::endl;
-		//std::cout << "result: " << result << std::endl;
+	template<typename BitArray>
+	Term<BitArray> Term<BitArray>::getGroupedTerm(Term<BitArray> &other) 
+	{
+		this->_checked = false;
+		other._checked = false;
 
-		if(result != 0U && result && !(result & (result - 1)))
-		{
-			this->_checked = false;
-			other._checked = false;
+		auto newMask = _result | _xMask;
 
-			auto newMask = result | _xMask;
-
-			return std::make_unique<Term<BitArray>>(Term(*this, newMask));
-		}	
-		else
-			return nullptr;
+		return Term(*this, other, newMask);
 	}
 
 	template<typename BitArray>
@@ -91,11 +110,40 @@ namespace QM
 		return _numberOfOne;
 	}
 
-
 	template<typename BitArray>
 	inline bool Term<BitArray>::isChecked() const
 	{
 		return _checked;
+	}
+
+	template<typename BitArray>
+	bool Term<BitArray>::operator==(Term const& other) const
+	{
+		return _bitArray == other._bitArray
+			&& _xMask == other._xMask
+			&& _checked == other._checked;
+	}
+
+	template<typename BitArray>
+	bool Term<BitArray>::operator!=(Term const& other) const
+	{
+		return _bitArray != other._bitArray
+			|| _xMask != other._xMask
+			|| _checked != other._checked;
+	}
+
+	template<typename BitArray>
+	bool Term<BitArray>::operator<(Term const& other) const
+	{
+		if(_bitArray == other._bitArray)
+			return _xMask < other._xMask;
+		return _bitArray < other._bitArray;
+	}
+
+	template<typename BitArray>
+	auto const& Term<BitArray>::getMinterms() const
+	{
+		return _minTerm;
 	}
 }
 #endif

@@ -52,38 +52,39 @@ TEST(TermCompareTest, NothingInCommon)
 	auto termFirst = QM::Term<uint64_t>(4, 3);
 	auto termSecond = QM::Term<uint64_t>(4, 4);
 
-	auto ptr = termFirst.compareIfImplicant(termSecond);
+	auto ptr = termFirst.isGreyAdjacent(termSecond);
 
 	EXPECT_FALSE(ptr);
 }
 
 TEST(TermCompareTest, CompareResultMaskedoff)
 {
-	auto term = QM::Term<uint64_t>(4, 3);
-	auto termMask = QM::Term<uint64_t>(term, 1);
+	auto term = QM::Term<uint64_t>(4, 3); //0011
+	auto tempTerm = QM::Term<uint64_t>(4, 2); //0010
+	auto termMask = QM::Term<uint64_t>(term, tempTerm, 1); //001X
 	auto termSecond = QM::Term<uint64_t>(4, 2);
 
-	auto ptr = termMask.compareIfImplicant(termSecond);
+	auto ptr = termMask.isGreyAdjacent(termSecond);
 
 	EXPECT_FALSE(ptr);
 }
 
 TEST(TermCompareTest, CompareResultImplicant)
 {
-	auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
-	auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
+	auto termFirst = QM::Term<uint64_t>(4, 1); // 0001
+	auto termSecond = QM::Term<uint64_t>(4, 9); // 1001
 
-	auto ptr = termFirst.compareIfImplicant(termSecond); // 001X
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond)); // X001
 
-	EXPECT_TRUE(ptr != nullptr);
+	auto ptr = termFirst.getGroupedTerm(termSecond);
 
 	EXPECT_FALSE(termFirst.isChecked());
 	EXPECT_FALSE(termSecond.isChecked());
 
-	EXPECT_EQ(ptr->_bitArray, termFirst._bitArray);
-	EXPECT_EQ(ptr->_size, termFirst._size);
-	EXPECT_EQ(ptr->getSetBitNum(), termFirst.getSetBitNum());
-	EXPECT_EQ(ptr->_xMask, static_cast<uint64_t>(1));
+	EXPECT_EQ(ptr._bitArray, termFirst._bitArray);
+	EXPECT_EQ(ptr._size, termFirst._size);
+	EXPECT_EQ(ptr.getSetBitNum(), termFirst.getSetBitNum());
+	EXPECT_EQ(ptr._xMask, static_cast<uint64_t>(8));
 }
 
 TEST(TermCompareTest, CompareResultImplicantFromImplicant)
@@ -92,33 +93,53 @@ TEST(TermCompareTest, CompareResultImplicantFromImplicant)
 	auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
 	auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
 
-	auto ptr = termFirst.compareIfImplicant(termSecond); // 001X
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+	auto ptr = termFirst.getGroupedTerm(termSecond); // 001X
 
 	auto termThird = QM::Term<uint64_t>(4, 10); // 1010
-	auto termThirdMasked = QM::Term<uint64_t>(termThird, 1);
-	auto resultPtr = ptr->compareIfImplicant(termThirdMasked); // X01X
+	auto termTemp = QM::Term<uint64_t>(4, 11); // 1011
+	auto termThirdMasked = QM::Term<uint64_t>(termThird, termTemp, 1); //101X
 
-	EXPECT_TRUE(resultPtr != nullptr);
+	EXPECT_TRUE(ptr.isGreyAdjacent(termThirdMasked));
+	auto resultPtr = ptr.getGroupedTerm(termThirdMasked); // X01X
+
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond)); // X001
+	ptr = termFirst.getGroupedTerm(termSecond);
 
 	EXPECT_FALSE(termFirst.isChecked());
 	EXPECT_FALSE(termSecond.isChecked());
-	EXPECT_TRUE(resultPtr->isChecked());
+	EXPECT_TRUE(resultPtr.isChecked());
 
-	EXPECT_EQ(resultPtr->_bitArray, termFirst._bitArray);
-	EXPECT_EQ(resultPtr->_size, termFirst._size);
-	EXPECT_EQ(resultPtr->getSetBitNum(), termFirst.getSetBitNum());
-	EXPECT_EQ(resultPtr->_xMask, static_cast<uint64_t>(9));
+	EXPECT_EQ(resultPtr._bitArray, termFirst._bitArray);
+	EXPECT_EQ(resultPtr._size, termFirst._size);
+	EXPECT_EQ(resultPtr.getSetBitNum(), termFirst.getSetBitNum());
+	EXPECT_EQ(resultPtr._xMask, static_cast<uint64_t>(9));
 }
 
 TEST(TermCompareTest, ComparingMasks)
 {
 	auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
 	auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
+	auto termThird = QM::Term<uint64_t>(4, 7); // 0111
+	auto termFourth = QM::Term<uint64_t>(4, 10); // 1010
 
-	auto termMaskedFirst = QM::Term<uint64_t>(termFirst, 4); // 0X11
-	auto termMaskedSecond = QM::Term<uint64_t>(termSecond, 8); // X010
+	auto termMaskedFirst = QM::Term<uint64_t>(termFirst, termThird, 4); // 0X11
+	auto termMaskedSecond = QM::Term<uint64_t>(termSecond, termFourth, 8); // X010
 
-	auto ret = termMaskedFirst.compareIfImplicant(termMaskedSecond);
-
-	EXPECT_FALSE(ret);
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+	EXPECT_FALSE(termMaskedFirst.isGreyAdjacent(termMaskedSecond));
 }
+
+
+TEST(TermCompareTest, MintermStacking)
+{
+	auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
+	auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
+
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+	auto child = termFirst.getGroupedTerm(termSecond);
+
+	EXPECT_EQ(child._minTerm[0], 3u);
+	EXPECT_EQ(child._minTerm[1], 2u);
+}
+

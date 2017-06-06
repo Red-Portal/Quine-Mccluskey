@@ -31,7 +31,7 @@ add_executable(QuineMccluskeyTest ${TEST_SOURCE_FILES})
 set(PROJECT_TEST QuineMccluskeyTest)
 
 # dependency
-## add_dependencies(QuineMccluskeyTest googletest)
+##add_dependencies(QuineMccluskeyTest googletest)
 
 # linking shared libraries
 if(NOT WIN32 OR MINGW)
