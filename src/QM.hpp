@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <set>
 
-#include <iostream>
-
 #include "Term.hpp"
 
 namespace QM
