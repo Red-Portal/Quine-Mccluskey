@@ -143,3 +143,33 @@ TEST(TermCompareTest, MintermStacking)
 	EXPECT_EQ(child._minTerm[1], 2u);
 }
 
+
+TEST(TermResultTest, getEquation)
+{
+	auto termFirst = QM::Term<uint64_t>(4, 3); // 0011
+	auto termSecond = QM::Term<uint64_t>(4, 2); // 0010
+	
+	EXPECT_TRUE(termFirst.isGreyAdjacent(termSecond));
+	auto child = termFirst.getGroupedTerm(termSecond);
+
+	auto result = child.getEquation(); // 001X
+
+	EXPECT_NE(std::find(result.begin(),
+						result.end(),
+						-1),
+			  result.end());
+	EXPECT_NE(std::find(result.begin(),
+						result.end(),
+						-2),
+			  result.end());
+
+	EXPECT_NE(std::find(result.begin(),
+						result.end(),
+						3),
+			  result.end());
+	EXPECT_EQ(std::find(result.begin(),
+						result.end(),
+						4),
+			  result.end());
+}
+

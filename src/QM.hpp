@@ -39,6 +39,8 @@ namespace QM
 
 		inline void setResult(TermVector const& implicants);
 
+		std::vector<std::vector<int>> _result;
+
 	public:
 		template<typename T>
 		inline explicit Reducer(int inputNum,
@@ -48,6 +50,7 @@ namespace QM
 		inline explicit Reducer(int inputNum,
 								std::initializer_list<T> const& minTerms,
 								std::initializer_list<T> const& dTerms);
+
 		~Reducer() = default;
 	};
 
@@ -261,7 +264,19 @@ namespace QM
 	template<typename BitArray>
 	void Reducer<BitArray>::setResult(TermVector const& implicants)
 	{
-		
+		_result.reserve(implicants.size());
+		for(auto& i : implicants)
+		{
+			_result.emplace_back();
+
+			auto equation = i.getEquation();
+
+			auto& back = _result.back();
+			back.reserve(equation.size());
+			back.insert(back.end(),
+						std::make_move_iterator(equation.begin()),
+						std::make_move_iterator(equation.end()));
+		}
 	}
 }
 #endif

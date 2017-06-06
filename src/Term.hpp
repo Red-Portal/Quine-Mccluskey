@@ -40,6 +40,7 @@ namespace QM
 		inline int getSetBitNum() const;
 		inline bool isChecked() const;
 		inline auto const& getMinterms() const;
+		inline auto getEquation() const;
 	};
 
 
@@ -144,6 +145,29 @@ namespace QM
 	auto const& Term<BitArray>::getMinterms() const
 	{
 		return _minTerm;
+	}
+
+	template<typename BitArray>
+	auto Term<BitArray>::getEquation() const
+	{
+		std::vector<int> equation;
+
+		for(auto i = 1; i < static_cast<int>(_size); ++i)
+		{
+			BitArray mask = 1 << (_size - 1);
+			mask = mask >> (i - 1);
+
+			if((_xMask & mask) != 0)
+				continue;
+
+			if((_bitArray & mask) != 0)
+				equation.push_back(i);
+			else
+			{
+				equation.push_back(-i);
+			}
+		}
+		return equation;
 	}
 }
 #endif
