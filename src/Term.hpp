@@ -10,17 +10,39 @@ namespace QM
     template<typename BitArray>
     class Term
     {
+        // this class is an abstraction over computations directly
+        // involving 'terms'
+        //
+        // isGrayAdjacent and getGroupedTerm are methods computing
+        // whether compared terms are gray adjacent, and if they are,
+        // generate a new term that groups the two terms.
+        //
+
+
     private:
+        // number of set bits.
+        // this dominates which group this term will be in
         int _numberOfOne;
         bool _checked;
         size_t _size;
+        
+        // the bit array containing the boolean representation of this term
         BitArray _bitArray;
+        // X bits, or don't care bits' bit Array representation
         BitArray _xMask;
+
+        // temporary variable.
         BitArray _result;
+
+        // the terms this bit covers.
+        // initially zero, and if this term is a grouped term,
+        // all the terms this term covers should be in this container.
         std::vector<BitArray> _minTerm;
 
     public:
         inline Term(size_t size, BitArray term);
+
+        // constructor for grouped term
         inline Term(Term<BitArray> const& first,
                     Term<BitArray> const& second,
                     BitArray mask);
@@ -29,7 +51,12 @@ namespace QM
         inline Term& operator=(Term const& other) = default;
         ~Term() = default;
 
+        // returns true if this term and the other term are gray adjacent.
+        // this method has side effect on _result.
         inline bool isGrayAdjacent(Term& other);
+
+        // get the newly grouped term.
+        // this has a side effect dependency on _result
         inline Term<BitArray> getGroupedTerm(Term& other);
         inline bool operator==(Term const& other) const;
         inline bool operator!=(Term const& other) const;
@@ -38,6 +65,8 @@ namespace QM
         inline int getSetBitNum() const;
         inline bool isChecked() const;
         inline auto const& getMinterms() const;
+
+        // get Boolean Equation representation
         inline auto getEquation() const;
     };
 
@@ -84,11 +113,15 @@ namespace QM
     template<typename BitArray>
     bool Term<BitArray>::isGrayAdjacent(Term<BitArray> &other)
     {
+        // X, don't care bits must be equal in order to be gray adjacent
+        // comparing them first is a short-circuit optimization
         if(_xMask != other._xMask)
             return false;
 
+        // compute different bits
         _result = (_bitArray ^ other._bitArray) & ~_xMask; //XOR operation
 
+        // if only one bit is different, it is gray adjacent 
         return _result && !(_result & (_result - 1));
     }
 
@@ -150,18 +183,24 @@ namespace QM
     {
         std::vector<int> equation;
 
+        // x, don't care bits are ommited in the boolean equation representation
+        // set bits correspond to a boolen term,
+        // unset bits correspond to a negative boolean term
         for(auto i = 1; i < static_cast<int>(_size); ++i)
         {
             BitArray mask = 1 << (_size - 1);
             mask = mask >> (i - 1);
 
+            // x, don't care bit
             if((_xMask & mask) != 0)
                 continue;
 
+            // set bit
             if((_bitArray & mask) != 0)
                 equation.push_back(i);
             else
             {
+                // unset bit. negative term
                 equation.push_back(-i);
             }
         }
