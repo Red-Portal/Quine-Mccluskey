@@ -3,7 +3,7 @@ project(QuineMccluskey)
 
 set(CMAKE_CXX_STANDARD 14)
 
-if(NOT MSVC)
+if(MSVC)
 	set(CMAKE_CXX_FLAGS "/WX- /Wall /Ox /Ob2")
 else()
 	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
