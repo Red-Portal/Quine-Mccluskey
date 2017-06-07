@@ -44,7 +44,7 @@ TEST_F(QuineMccluskeyTest, reduce)
         dTermObj.emplace_back(4, i);
     }
 
-    auto result = this->reduce(mTermObj, dTermObj);
+    auto result = this->identify(mTermObj, dTermObj);
 
     EXPECT_NE(std::find_if(result.begin(),
                            result.end(),
@@ -78,7 +78,7 @@ TEST_F(QuineMccluskeyTest, computeImplicant)
     second.emplace_back(QM::Term<uint64_t>(4, 6)); // 0110
     second.emplace_back(QM::Term<uint64_t>(4, 9)); // 1001
 
-    auto result = computeImplicant(first, second);
+    auto result = iterateThroughGroup(first, second);
 
     EXPECT_EQ(result.size(), 3u); 
     EXPECT_FALSE(first[0].isChecked()); 
@@ -100,7 +100,7 @@ TEST_F(QuineMccluskeyTest, computeBySetBits)
     for(auto& i : vec)
         map[i.getSetBitNum()].push_back(i);
 
-    auto result = this->computeByNumberOfSetBits(map);
+    auto result = this->iterateThroughCollumn(map);
 
     EXPECT_EQ(result[1].size() , 3u);
     EXPECT_EQ(result[2].size() , 0u);
@@ -132,7 +132,7 @@ TEST_F(QuineMccluskeyTest, selectPrimeImplicant)
         dTermObj.emplace_back(4, i);
     }
 
-    auto result = this->reduce(mTermObj, dTermObj);
+    auto result = this->identify(mTermObj, dTermObj);
     auto prime = select(result, mTermObj);
 
     EXPECT_EQ(prime.size(), 3u);

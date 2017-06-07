@@ -26,36 +26,37 @@ namespace QM
         
         // the procedure call is as follows
         //
-        // reduce is the phase 1 procedure
+        // identify is the phase 1 procedure
         //
-        // computeByNumberOfSetBits is called for each iteration in the process
+        // iterateThroughCollumns is called for each iteration in the process
         // the iteration process stops if there isn't any more reducable terms.
         //
-        // computeImplicant is called in each iteration, it starts a loop that
-        // calls a getImplicant for each "N, N+1 number of set bits" groups
+        // iterateThroughGroup is called in each iteration, it starts a loop that
+        // asks each term wether they are implicants for each "N, N+1 number of set bits" groups
         //
-        // select is the prime implicant selection, phase 2
+        // select is the phase 2 procedure
+        // PI selection 
         // 
         // set result sets the result into a integer representation of boolean equation
 
 
         // call computeImplcant procedure for each grouped Implcant size
-        inline auto computeByNumberOfSetBits(
+        inline auto iterateThroughCollumn(
             std::unordered_map<BitArray, TermVector>& map) const;
 
 
-        // find implicants between groups of terms with n, n+1 numbers of set bits
-        inline auto computeImplicant(TermVector& first,
-                                     TermVector& second) const;
+        // iterate combinatorially between two groups of terms with n, n+1 numbers of set bits
+        inline auto iterateThroughGroup(TermVector& first,
+                                        TermVector& second) const;
 
         // find checked implicants
-        inline auto getImplicants(
+        inline auto getCheckedPrimeImplicants(
             std::unordered_map<BitArray, TermVector> const&) const;
 
-        // start phase 1: reduction procedure 
-        inline auto reduce(TermVector const& mTerms, TermVector const& dTerms) const;
+        // start phase 1: prime implicant identification 
+        inline auto identify(TermVector const& mTerms, TermVector const& dTerms) const;
 
-        // select prime implicants
+        // start phase 2: select prime implicants
         inline auto select(TermVector const& implicants, TermVector const& mTerms) const;
 
         // store reduction result into boolean equation representation
@@ -95,8 +96,8 @@ namespace QM
         for (auto it : dTerms)
             dTerms_.emplace_back(Term<BitArray>(inputNum, it));
 
-        // reduction procedure
-        auto implicants = reduce(mTerms_, dTerms_);
+        // Quine-Mccluskey procedure
+        auto implicants = identify(mTerms_, dTerms_);
         auto primeImpl = select(implicants, mTerms_);
 
         setResult(primeImpl);
@@ -122,15 +123,15 @@ namespace QM
         for (auto it : dTerms)
             dTerms_.emplace_back(Term<BitArray>(inputNum, it));
 
-        // reduction procedure
-        auto implicants = reduce(mTerms_, dTerms_);
+        // Quine-Mccluskey procedure
+        auto implicants = identify(mTerms_, dTerms_);
         auto primeImpl = select(implicants, mTerms_);
 
         setResult(primeImpl);
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::reduce(TermVector const& mTerms,
+    auto Reducer<BitArray>::identify(TermVector const& mTerms,
                                    TermVector const& dTerms) const
     {
         std::vector<std::unordered_map<BitArray, TermVector>> byImplicantSize;
@@ -145,10 +146,12 @@ namespace QM
         for(auto& it : dTerms)
             sizeZero[it.getSetBitNum()].push_back(it);
 
-        // phase 1 reduction procedure
+        // phase 1 PI identification procedure
+        // this loop iterate through all the collumns
+        // collumns are seperated by implicants size
         for(BitArray idx = 0; idx < byImplicantSize.size(); ++idx)
         {
-            auto implicant = computeByNumberOfSetBits(byImplicantSize[idx]);
+            auto implicant = iterateThroughCollumn(byImplicantSize[idx]);
 
             if(implicant.empty())
                 continue;
@@ -156,27 +159,28 @@ namespace QM
             byImplicantSize.push_back(std::move(implicant));
         } 
 
-        // finding all the checked implicants
+        // finding all the checked implicants which are prime implicants
         for(auto& i : byImplicantSize)
         {
-            auto realImp = getImplicants(i);
+            auto realImp = getCheckedPrimeImplicants(i);
             result.insert(result.end(),
                           std::make_move_iterator(realImp.begin()),
                           std::make_move_iterator(realImp.end()));
         }
-
         return result;
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::computeByNumberOfSetBits(
+    auto Reducer<BitArray>::iterateThroughCollumn(
         std::unordered_map<BitArray, TermVector>& map) const
     {
         std::unordered_map<BitArray, TermVector> result;
 
+        // ietrating through the collumn
+        // calling 'iterateTroughGroup' for each groups in the collumn
         for(BitArray i = 0; i < _inputNum; ++i)
         {
-            // checking if there adjacent "set bit number" groups actually exist
+            // checking if adjacent "group by set bit number" actually exist
             auto first = map.find(i);
             if(first == map.end())
                 continue;
@@ -185,16 +189,16 @@ namespace QM
             if(second == map.end())
                 continue;
 
-            result[i] = computeImplicant(first->second,
-                                         second->second);
+            result[i] = iterateThroughGroup(first->second,
+                                            second->second);
         }
 
         return result;
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::computeImplicant(TermVector& first,
-                                             TermVector& second) const
+    auto Reducer<BitArray>::iterateThroughGroup(TermVector& first,
+                                                TermVector& second) const
     {
         std::set<Term<BitArray>> set;
 
@@ -214,7 +218,7 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::getImplicants(
+    auto Reducer<BitArray>::getCheckedPrimeImplicants(
         std::unordered_map<BitArray, TermVector> const& map) const
     {
         TermVector result;
