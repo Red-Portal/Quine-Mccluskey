@@ -26,8 +26,6 @@ set(SOURCE_FILES
 set(TEST_SOURCE_FILES
   ${SOURCE_FILES}
   test/main.cpp
-  #test/QMTest.cpp
-  #test/TermTest.cpp
   test/Test.cpp)
 
 # project executable
