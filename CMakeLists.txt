@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.6)
 project(QuineMccluskey)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 
 if(NOT MSVC)
 	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
