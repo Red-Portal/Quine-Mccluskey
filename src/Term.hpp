@@ -2,8 +2,6 @@
 #define TERM_HPP
 
 #include <vector>
-#include <memory>
-#include <cstdlib>
 
 namespace QM
 {

@@ -4,6 +4,10 @@ project(QuineMccluskey)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
+endif()
+
 # GTEST paths
 add_subdirectory(googletest/googletest)
 enable_testing()

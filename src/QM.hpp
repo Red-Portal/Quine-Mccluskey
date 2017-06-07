@@ -2,11 +2,8 @@
 #define QUINEMCCLUSKEY_QM_H
 
 #include <vector>
-#include <array>
-#include <cstdlib>
 #include <initializer_list>
 #include <functional>
-#include <algorithm>
 #include <unordered_map>
 #include <set>
 
