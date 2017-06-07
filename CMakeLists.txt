@@ -4,6 +4,8 @@ project(QuineMccluskey)
 set(CMAKE_CXX_STANDARD 14)
 
 if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS "/WX- /Wall /Ox /Ob2")
+else()
 	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 endif()
 
@@ -43,11 +45,11 @@ if(NOT WIN32 OR MINGW)
 	${GTEST_LIBS_DIR}/libgtest_main.a)
 else()
   target_link_libraries(${PROJECT_TEST}
-	debug ${GTEST_LIBS_DIR}/DebugLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest${CMAKE_FIND_LIBRARY_SUFFIXES}
-	optimized ${GTEST_LIBS_DIR}/ReleaseLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest${CMAKE_FIND_LIBRARY_SUFFIXES})
+	debug ${GTEST_LIBS_DIR}/Debug/gtest${CMAKE_FIND_LIBRARY_SUFFIXES}
+	optimized ${GTEST_LIBS_DIR}/Release/gtest${CMAKE_FIND_LIBRARY_SUFFIXES})
   target_link_libraries(${PROJECT_TEST}
-	debug ${GTEST_LIBS_DIR}/DebugLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest_main${CMAKE_FIND_LIBRARY_SUFFIXES}
-	optimized ${GTEST_LIBS_DIR}/ReleaseLibs/${CMAKE_FIND_LIBRARY_PREFIXES}gtest_main${CMAKE_FIND_LIBRARY_SUFFIXES})
+	debug ${GTEST_LIBS_DIR}/Debug/gtest_main${CMAKE_FIND_LIBRARY_SUFFIXES}
+	optimized ${GTEST_LIBS_DIR}/Release/gtest_main${CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
 # add test
