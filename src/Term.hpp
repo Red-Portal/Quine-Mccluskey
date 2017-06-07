@@ -184,7 +184,7 @@ namespace QM
         // x, don't care bits are ommited in the boolean equation representation
         // set bits correspond to a boolen term,
         // unset bits correspond to a negative boolean term
-        for(auto i = 1; i < static_cast<int>(_size); ++i)
+        for(auto i = 1; i < static_cast<int>(_size + 1); ++i)
         {
             BitArray mask = 1 << (_size - 1);
             mask = mask >> (i - 1);
