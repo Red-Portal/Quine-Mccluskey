@@ -4,7 +4,7 @@ project(QuineMccluskey)
 set(CMAKE_CXX_STANDARD 14)
 
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "/WX- /Wall /Ox /Ob2")
+	set(CMAKE_CXX_FLAGS "/WX- /Wall /O2 /Ob2")
 else()
 	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 endif()
@@ -26,8 +26,9 @@ set(SOURCE_FILES
 set(TEST_SOURCE_FILES
   ${SOURCE_FILES}
   test/main.cpp
-  test/QMTest.cpp
-  test/TermTest.cpp)
+  #test/QMTest.cpp
+  #test/TermTest.cpp
+  test/Test.cpp)
 
 # project executable
 ## add_executable(QuineMccluskey ${SOURCE_FILES})

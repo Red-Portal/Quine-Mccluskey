@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <initializer_list>
-#include <functional>
+#include <algorithm>
 #include <unordered_map>
 #include <set>
 
@@ -253,7 +253,7 @@ namespace QM
         {
             implicantsCheckList[&i] = false;
 
-            for(auto& j : i._minTerm)
+            for(auto& j : i.getMinterms())
             {
 				if(std::find(mTerms.begin(), mTerms.end(), j) != mTerms.end())
                     chart[j].push_back(&i);
