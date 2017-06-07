@@ -54,7 +54,8 @@ namespace QM
         inline auto identify(TermVector const& mTerms, TermVector const& dTerms) const;
 
         // start phase 2: select prime implicants
-        inline auto select(TermVector const& implicants, TermVector const& mTerms) const;
+		template<typename T>
+        inline auto select(TermVector const& implicants, std::vector<T> const& mTerms) const;
 
         // store reduction result into boolean equation representation
         inline void setResult(TermVector const& implicants);
@@ -97,7 +98,7 @@ namespace QM
 
         // Quine-Mccluskey procedure
         auto implicants = identify(mTerms_, dTerms_);
-        auto primeImpl = select(implicants, mTerms_);
+        auto primeImpl = select(implicants, minTerms);
 
         setResult(primeImpl);
     }
@@ -124,7 +125,7 @@ namespace QM
 
         // Quine-Mccluskey procedure
         auto implicants = identify(mTerms_, dTerms_);
-        auto primeImpl = select(implicants, mTerms_);
+        auto primeImpl = select(implicants, std::vector<T>(minTerms.begin(), minTerms.end()));
 
         setResult(primeImpl);
     }
@@ -240,8 +241,9 @@ namespace QM
     }
 
     template<typename BitArray>
+	template<typename T>
     auto Reducer<BitArray>::select(TermVector const& implicants,
-                                   TermVector const& mTerms) const
+                                   std::vector<T> const& mTerms) const
     {
         std::unordered_map<BitArray, std::vector<Term<BitArray> const*>> chart;
         std::unordered_map<Term<BitArray> const*, bool> implicantsCheckList; 
@@ -253,7 +255,8 @@ namespace QM
 
             for(auto& j : i._minTerm)
             {
-                chart[j].push_back(&i);
+				if(std::find(mTerms.begin(), mTerms.end(), j) != mTerms.end())
+                    chart[j].push_back(&i);
             }
         }
 
