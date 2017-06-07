@@ -21,9 +21,7 @@ Because this implementation uses bit masking/shifting.
 * The integer is the input number.
 * Negative integer values are negative inputs.
 
-   A B C  =  1  2  3
-   A'B'C  = -1 -2 -3
-   B C D' =  2  3 -4
+   A B C  =  1  2  3       A'B'C  = -1 -2 -3      B C D' =  2  3 -4
 
 ## TODO
 
