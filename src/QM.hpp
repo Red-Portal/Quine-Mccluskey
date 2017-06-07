@@ -69,6 +69,8 @@ namespace QM
                                 std::initializer_list<T> const& minTerms,
                                 std::initializer_list<T> const& dTerms);
 
+        inline auto getBooleanFunction() const;
+
         ~Reducer() = default;
     };
 
@@ -314,6 +316,12 @@ namespace QM
                         std::make_move_iterator(equation.begin()),
                         std::make_move_iterator(equation.end()));
         }
+    }
+
+    template<typename BitArray>
+    auto Reducer<BitArray>::getBooleanFunction() const
+    {
+        return _result;
     }
 }
 #endif
