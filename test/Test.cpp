@@ -14,9 +14,11 @@
    limitations under the License.
 */
 
-#include <gtest/gtest.h>
 #include <vector>
 #include <functional>
+#include <chrono>
+
+#include <gtest/gtest.h>
 
 #include "../src/QM.hpp"
 
@@ -24,11 +26,23 @@ TEST(QuineMccluskeyTest, Test1)
 {
     using namespace std::placeholders;
 
+
     std::vector<int> mTerms{4, 8, 10, 11, 12, 15};
     std::vector<int> dTerms{9, 14};
 
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     auto reducer = QM::Reducer<uint64_t>(4, mTerms, dTerms);
     auto reduced = reducer.getBooleanFunction();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = end - start;
+    auto time = std::chrono::duration<double, std::micro>(duration);
+
+    std::cout << "duration: " << time.count()
+              << " ns"
+              << std::endl;
 
     auto comp = [](std::vector<int> compare,
                    std::vector<int> const& vec) -> bool {
@@ -63,11 +77,22 @@ TEST(QuineMccluskeyTest, Test2)
 {
     using namespace std::placeholders;
 
+
     std::vector<int> mTerms{0, 1, 4, 8, 9, 10, 11, 20, 22};
     std::vector<int> dTerms{7, 13, 14, 16,};
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     auto reducer = QM::Reducer<uint64_t>(5, mTerms, dTerms);
     auto reduced = reducer.getBooleanFunction();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = end - start;
+
+    auto time = std::chrono::duration<double, std::micro>(duration);
+    
+    std::cout << "duration: " << time.count() 
+              << " ns" << std::endl;
 
     auto comp = [](std::vector<int> compare,
                    std::vector<int> const& vec) -> bool {
