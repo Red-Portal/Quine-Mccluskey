@@ -5,9 +5,7 @@ Quine-Mccluskey algorithm C++ implementation.
 ## How to use
 
 ```c++
-auto reducer = QM::Reducer<uT>{inputSize,
-                                     minTerms,
-                                     dontCareTerms};
+auto reducer = QM::Reducer<uT>{inputSize, minTerms, dontCareTerms};
 auto result = reducer.getBooleanfunction();
 ```
 
@@ -21,13 +19,14 @@ Because this implementation uses bit masking/shifting.
 * The integer is the input number.
 * Negative integer values are negative inputs.
 
-   A B C  =  1  2  3       A'B'C  = -1 -2 -3      B C D' =  2  3 -4
+* A B C  =  1  2  3
+* A'B'C  = -1 -2 -3
+* B C D' =  2  3 -4
 
 ## TODO
 
 * msvc support 
   msvc currently has problems with auto return type deduction
-* benchmark results
 * use boot::dynamic_bitset instead of user provided bit array
 * further optimization 
 
