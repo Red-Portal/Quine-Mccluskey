@@ -40,66 +40,66 @@ int main(int argc, char* argv[])
     using namespace std::placeholders;
 
 
-    std::vector<int> mTerms{4, 8, 10, 11, 12, 15};
-    std::vector<int> dTerms{9, 14};
-
-    {
-	auto start = std::chrono::high_resolution_clock::now();
-
-	auto reducer = QM::Reducer<uint64_t>(4, mTerms, dTerms);
-	auto reduced = reducer.getBooleanFunction();
-
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = end - start;
-	auto time = std::chrono::duration<double, std::micro>(duration);
-
-	std::cout << "duration: " << time.count()
-		  << " ns"
-		  << std::endl;
-
-	std::cout << "result: ";
-	for (auto i = 0u; i < reduced.size(); ++i)
 	{
-	    for (auto j: reduced[i])
-	    {
-		std::cout << decoder(j);
-	    }
+		std::vector<int> mTerms{ 4, 8, 10, 11, 12, 15 };
+		std::vector<int> dTerms{ 9, 14 };
 
-	    if(i < reduced.size() - 1)
-		std::cout << " + ";
+		auto start = std::chrono::high_resolution_clock::now();
+
+		auto reducer = QM::Reducer<uint64_t>(4, mTerms, dTerms);
+		auto reduced = reducer.getBooleanFunction();
+
+		auto end = std::chrono::high_resolution_clock::now();
+		auto duration = end - start;
+		auto time = std::chrono::duration<double, std::micro>(duration);
+
+		std::cout << "duration: " << time.count()
+			<< " ns"
+			<< std::endl;
+
+		std::cout << "result: ";
+		for (auto i = 0u; i < reduced.size(); ++i)
+		{
+			for (auto j : reduced[i])
+			{
+				std::cout << decoder(j);
+			}
+
+			if (i < reduced.size() - 1)
+				std::cout << " + ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl;
-    }
 
-    {
-	std::vector<int> mTerms{0, 1, 4, 8, 9, 10, 11, 20, 22};
-	std::vector<int> dTerms{7, 13, 14, 16,};
-
-	auto start = std::chrono::high_resolution_clock::now();
-
-	auto reducer = QM::Reducer<uint64_t>(5, mTerms, dTerms);
-	auto reduced = reducer.getBooleanFunction();
-
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = end - start;
-
-	auto time = std::chrono::duration<double, std::micro>(duration);
-    
-	std::cout << "duration: " << time.count() 
-		  << " ns" << std::endl;
-
-	std::cout << "result: ";
-	for (auto i = 0u; i < reduced.size(); ++i)
 	{
-	    for (auto j: reduced[i])
-	    {
-		std::cout << decoder(j);
-	    }
+		std::vector<int> mTerms{ 0, 1, 4, 8, 9, 10, 11, 20, 22 };
+		std::vector<int> dTerms{ 7, 13, 14, 16, };
 
-	    if(i < reduced.size() - 1)
-		std::cout << " + ";
+		auto start = std::chrono::high_resolution_clock::now();
+
+		auto reducer = QM::Reducer<uint64_t>(5, mTerms, dTerms);
+		auto reduced = reducer.getBooleanFunction();
+
+		auto end = std::chrono::high_resolution_clock::now();
+		auto duration = end - start;
+
+		auto time = std::chrono::duration<double, std::micro>(duration);
+
+		std::cout << "duration: " << time.count()
+			<< " ns" << std::endl;
+
+		std::cout << "result: ";
+		for (auto i = 0u; i < reduced.size(); ++i)
+		{
+			for (auto j : reduced[i])
+			{
+				std::cout << decoder(j);
+			}
+
+			if (i < reduced.size() - 1)
+				std::cout << " + ";
+		}
+		std::cout << std::endl;
 	}
-	std::cout << std::endl;
-    }
-    return 0;
+	return 0;
 }
