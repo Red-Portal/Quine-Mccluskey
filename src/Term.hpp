@@ -78,10 +78,10 @@ namespace QM
 
         inline int getSetBitNum() const;
         inline bool isChecked() const;
-        inline auto const& getMinterms() const;
+        inline std::vector<BitArray> const& getMinterms() const;
 
         // get Boolean Equation representation
-        inline auto getEquation() const;
+        inline std::vector<int> getEquation() const;
     };
 
 
@@ -187,13 +187,14 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto const& Term<BitArray>::getMinterms() const
+    std::vector<BitArray> const&
+    Term<BitArray>::getMinterms() const
     {
         return _minTerm;
     }
 
     template<typename BitArray>
-    auto Term<BitArray>::getEquation() const
+    std::vector<int> Term<BitArray>::getEquation() const
     {
         std::vector<int> equation;
 

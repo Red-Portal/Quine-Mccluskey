@@ -54,27 +54,30 @@ namespace QM
 
 
         // call computeImplcant procedure for each grouped Implcant size
-        inline auto iterateThroughCollumn(
-            std::unordered_map<BitArray, TermVector>& map) const;
+        inline std::unordered_map<BitArray, TermVector>
+        iterateThroughCollumn(std::unordered_map<BitArray, TermVector>& map) const;
 
 
         // iterate combinatorially between two groups of terms with n, n+1 numbers of set bits
-        inline auto iterateThroughGroup(TermVector& first,
-                                        TermVector& second) const;
+        inline TermVector
+        iterateThroughGroup(TermVector& first, TermVector& second) const;
 
         // find checked implicants
-        inline auto getCheckedPrimeImplicants(
-            std::unordered_map<BitArray, TermVector> const&) const;
+        inline TermVector
+        getCheckedPrimeImplicants(std::unordered_map<BitArray, TermVector> const&) const;
 
         // start phase 1: prime implicant identification 
-        inline auto identify(TermVector const& mTerms, TermVector const& dTerms) const;
+        inline TermVector
+        identify(TermVector const& mTerms, TermVector const& dTerms) const;
 
         // start phase 2: select prime implicants
 		template<typename T>
-        inline auto select(TermVector const& implicants, std::vector<T> const& mTerms) const;
+        inline TermVector
+        select(TermVector const& implicants, std::vector<T> const& mTerms) const;
 
         // store reduction result into boolean equation representation
-        inline void setResult(TermVector const& implicants);
+        inline void
+        setResult(TermVector const& implicants);
 
     public:
         template<typename T>
@@ -86,7 +89,8 @@ namespace QM
                                 std::initializer_list<T> const& minTerms,
                                 std::initializer_list<T> const& dTerms);
 
-        inline auto getBooleanFunction() const;
+        inline std::vector<std::vector<int>>
+        getBooleanFunction() const;
 
         ~Reducer() = default;
     };
@@ -147,8 +151,9 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::identify(TermVector const& mTerms,
-                                   TermVector const& dTerms) const
+    std::vector<QM::Term<BitArray>>
+    Reducer<BitArray>::
+    identify(TermVector const& mTerms, TermVector const& dTerms) const
     {
         std::vector<std::unordered_map<BitArray, TermVector>> byImplicantSize;
         TermVector result;
@@ -187,8 +192,9 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::iterateThroughCollumn(
-        std::unordered_map<BitArray, TermVector>& map) const
+    std::unordered_map<BitArray, std::vector<QM::Term<BitArray>>>
+    Reducer<BitArray>::
+    iterateThroughCollumn(std::unordered_map<BitArray, TermVector>& map) const
     {
         std::unordered_map<BitArray, TermVector> result;
 
@@ -213,8 +219,9 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::iterateThroughGroup(TermVector& first,
-                                                TermVector& second) const
+    std::vector<QM::Term<BitArray>>
+    Reducer<BitArray>::
+    iterateThroughGroup(TermVector& first, TermVector& second) const
     {
         std::set<Term<BitArray>> set;
 
@@ -234,8 +241,10 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::getCheckedPrimeImplicants(
-        std::unordered_map<BitArray, TermVector> const& map) const
+    std::vector<QM::Term<BitArray>>
+    Reducer<BitArray>::
+    getCheckedPrimeImplicants(std::unordered_map<BitArray,
+                                                 TermVector> const& map) const
     {
         TermVector result;
 
@@ -258,8 +267,9 @@ namespace QM
 
     template<typename BitArray>
 	template<typename T>
-    auto Reducer<BitArray>::select(TermVector const& implicants,
-                                   std::vector<T> const& mTerms) const
+    std::vector<QM::Term<BitArray>>
+    Reducer<BitArray>::
+    select(TermVector const& implicants, std::vector<T> const& mTerms) const
     {
         std::unordered_map<BitArray, std::vector<Term<BitArray> const*>> chart;
         std::unordered_map<Term<BitArray> const*, bool> implicantsCheckList; 
@@ -338,7 +348,9 @@ namespace QM
     }
 
     template<typename BitArray>
-    auto Reducer<BitArray>::getBooleanFunction() const
+    std::vector<std::vector<int>>
+    Reducer<BitArray>::
+    getBooleanFunction() const
     {
         return _result;
     }
