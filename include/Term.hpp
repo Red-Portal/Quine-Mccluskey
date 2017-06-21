@@ -19,6 +19,8 @@
 
 #include <vector>
 
+#include "dynamic_bitset/include/boost/dynamic_bitset.hpp"
+
 namespace QM
 {
     template<typename BitArray>
@@ -29,8 +31,7 @@ namespace QM
         //
         // isGrayAdjacent and getGroupedTerm are methods computing
         // whether compared terms are gray adjacent, and if they are,
-// generate a new term that groups the two terms.
-        //
+        // generate a new term that groups the two terms.
 
 
     private:
