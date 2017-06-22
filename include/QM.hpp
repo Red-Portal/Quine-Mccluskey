@@ -27,14 +27,13 @@
 
 namespace QM
 {
-    template<typename BitArray>
     class Reducer
     {
     private:
         using TermVector = std::vector<Term<BitArray>>;
 
-        size_t const _inputNum;
-        std::vector<std::vector<int>> _result;
+        size_t const _inputNum
+        std::vector<std::vector<int>> _result
        
         // the procedure call is as follows
         //
@@ -95,7 +94,6 @@ namespace QM
     };
 
 
-    template<typename BitArray>
     template<typename T>
     Reducer<BitArray>::Reducer(int inputNum,
                                std::vector<T> const& minTerms,
@@ -122,7 +120,6 @@ namespace QM
         setResult(primeImpl);
     }
 
-    template<typename BitArray>
     template<typename T>
     Reducer<BitArray>::Reducer(int inputNum,
                                std::initializer_list<T> const& minTerms,
@@ -149,7 +146,6 @@ namespace QM
         setResult(primeImpl);
     }
 
-    template<typename BitArray>
     std::vector<QM::Term<BitArray>>
     Reducer<BitArray>::
     identify(TermVector const& mTerms, TermVector const& dTerms) const
@@ -190,7 +186,6 @@ namespace QM
         return result;
     }
 
-    template<typename BitArray>
     std::unordered_map<BitArray, std::vector<QM::Term<BitArray>>>
     Reducer<BitArray>::
     iterateThroughCollumn(std::unordered_map<BitArray, TermVector>& map) const
@@ -217,7 +212,6 @@ namespace QM
         return result;
     }
 
-    template<typename BitArray>
     std::vector<QM::Term<BitArray>>
     Reducer<BitArray>::
     iterateThroughGroup(TermVector& first, TermVector& second) const
@@ -239,7 +233,6 @@ namespace QM
         return TermVector(set.begin(), set.end());
     }
 
-    template<typename BitArray>
     std::vector<QM::Term<BitArray>>
     Reducer<BitArray>::
     getCheckedPrimeImplicants(std::unordered_map<BitArray,
@@ -264,8 +257,7 @@ namespace QM
         return result;
     }
 
-    template<typename BitArray>
-	template<typename T>
+    template<typename T>
     std::vector<QM::Term<BitArray>>
     Reducer<BitArray>::
     select(TermVector const& implicants, std::vector<T> const& mTerms) const
@@ -328,8 +320,9 @@ namespace QM
         return TermVector(result.begin(), result.end());
     }
 
-    template<typename BitArray>
-    void Reducer<BitArray>::setResult(TermVector const& implicants)
+    void
+    Reducer<BitArray>::
+    setResult(TermVector const& implicants)
     {
         _result.reserve(implicants.size());
         for(auto& i : implicants)
@@ -346,7 +339,6 @@ namespace QM
         }
     }
 
-    template<typename BitArray>
     std::vector<std::vector<int>>
     Reducer<BitArray>::
     getBooleanFunction() const

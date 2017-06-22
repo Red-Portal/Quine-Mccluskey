@@ -23,7 +23,6 @@
 
 namespace QM
 {
-    template<typename BitArray>
     class Term
     {
         // this class is an abstraction over computations directly
@@ -87,8 +86,8 @@ namespace QM
 
 
 
-    template<typename BitArray>
-    inline Term<BitArray>::Term(size_t size, BitArray term)
+    Term::
+    Term(size_t size, BitArray term)
         :_numberOfOne(0),
          _checked(true),
          _size(size),
@@ -106,27 +105,27 @@ namespace QM
     }
 
 
-    template<typename BitArray>
-    inline Term<BitArray>::Term(Term<BitArray> const& first,
-                                Term<BitArray> const& second,
-                                BitArray mask)
-        :_numberOfOne(first._numberOfOne),
-         _checked(true),
-         _size(first._size),
-         _bitArray(first._bitArray),
-         _xMask(mask),
-         _result(0)
+    Term::
+    Term(Term<BitArray> const& first,  Term<BitArray> const& second,
+	 BitArray mask)
+	:_numberOfOne(first._numberOfOne),
+	 _checked(true),
+	 _size(first._size),
+	 _bitArray(first._bitArray),
+	 _xMask(mask),
+	 _result(0)
     {
-        _minTerm.insert(_minTerm.end(),
-                        first._minTerm.begin(),
-                        first._minTerm.end());
+	_minTerm.insert(_minTerm.end(),
+			first._minTerm.begin(),
+			first._minTerm.end());
         _minTerm.insert(_minTerm.end(),
                         second._minTerm.begin(),
                         second._minTerm.end());
     }
 
-    template<typename BitArray>
-    bool Term<BitArray>::isGrayAdjacent(Term<BitArray> &other)
+    bool
+    Term::
+    isGrayAdjacent(Term<BitArray> &other)
     {
         // X, don't care bits must be equal in order to be gray adjacent
         // comparing them first is a short-circuit optimization
@@ -140,8 +139,9 @@ namespace QM
         return _result && !(_result & (_result - 1));
     }
 
-    template<typename BitArray>
-    Term<BitArray> Term<BitArray>::getGroupedTerm(Term<BitArray> &other) 
+    Term
+    Term::
+    getGroupedTerm(Term<BitArray> &other) 
     {
         this->_checked = false;
         other._checked = false;
@@ -151,51 +151,57 @@ namespace QM
         return Term(*this, other, newMask);
     }
 
-    template<typename BitArray>
-    inline int Term<BitArray>::getSetBitNum() const
+    int
+    Term::
+    getSetBitNum() const
     {
         return _numberOfOne;
     }
 
-    template<typename BitArray>
-    inline bool Term<BitArray>::isChecked() const
+    bool
+    Term::
+    isChecked() const
     {
         return _checked;
     }
 
-    template<typename BitArray>
-    bool Term<BitArray>::operator==(Term const& other) const
+    bool
+    Term::
+    operator==(Term const& other) const
     {
         return _bitArray == other._bitArray
             && _xMask == other._xMask
             && _checked == other._checked;
     }
 
-    template<typename BitArray>
-    bool Term<BitArray>::operator!=(Term const& other) const
+    bool
+    Term::
+    operator!=(Term const& other) const
     {
         return _bitArray != other._bitArray
             || _xMask != other._xMask
             || _checked != other._checked;
     }
 
-    template<typename BitArray>
-    bool Term<BitArray>::operator<(Term const& other) const
+    bool
+    Term::
+    operator<(Term const& other) const
     {
         if(_bitArray == other._bitArray)
             return _xMask < other._xMask;
         return _bitArray < other._bitArray;
     }
 
-    template<typename BitArray>
     std::vector<BitArray> const&
-    Term<BitArray>::getMinterms() const
+    Term::
+    getMinterms() const
     {
         return _minTerm;
     }
 
-    template<typename BitArray>
-    std::vector<int> Term<BitArray>::getEquation() const
+    std::vector<int>
+    Term::
+    getEquation() const
     {
         std::vector<int> equation;
 
