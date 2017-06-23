@@ -19,10 +19,12 @@
 
 #include <vector>
 
-#include "dynamic_bitset/include/boost/dynamic_bitset.hpp"
+#include "boost/dynamic_bitset.hpp"
 
 namespace QM
 {
+    using bit_array = boost::dynamic_bitset<>;
+
     class Term
     {
         // this class is an abstraction over computations directly
@@ -31,35 +33,33 @@ namespace QM
         // isGrayAdjacent and getGroupedTerm are methods computing
         // whether compared terms are gray adjacent, and if they are,
         // generate a new term that groups the two terms.
-
-
     private:
         // number of set bits.
         // this dominates which group this term will be in
-        int _numberOfOne;
+        int _number_of_setbit;
         bool _checked;
         size_t _size;
         
         // the bit array containing the boolean representation of this term
-        BitArray _bitArray;
+	bit_array _bitArray;
         // X bits, or don't care bits' bit Array representation
-        BitArray _xMask;
+        bit_array _xMask;
 
         // temporary variable.
-        BitArray _result;
+        bit_array _result;
 
         // the terms this bit covers.
         // initially zero, and if this term is a grouped term,
         // all the terms this term covers should be in this container.
-        std::vector<BitArray> _minTerm;
+        std::vector<bit_array> _minTerm;
 
     public:
-        inline Term(size_t size, BitArray term);
+        inline Term(size_t size, bit_array term);
 
         // constructor for grouped term
-        inline Term(Term<BitArray> const& first,
-                    Term<BitArray> const& second,
-                    BitArray mask);
+        inline Term(Term const& first,
+                    Term const& second,
+                    bit_array mask);
         inline Term(Term const&) = default;
         inline Term(Term&&) noexcept = default;
         inline Term& operator=(Term const& other) = default;
@@ -71,14 +71,14 @@ namespace QM
 
         // get the newly grouped term.
         // this has a side effect dependency on _result
-        inline Term<BitArray> getGroupedTerm(Term& other);
+        inline Term getGroupedTerm(Term& other);
         inline bool operator==(Term const& other) const;
         inline bool operator!=(Term const& other) const;
         inline bool operator<(Term const& oter) const;
 
         inline int getSetBitNum() const;
         inline bool isChecked() const;
-        inline std::vector<BitArray> const& getMinterms() const;
+        inline std::vector<bit_array> const& getMinterms() const;
 
         // get Boolean Equation representation
         inline std::vector<int> getEquation() const;
@@ -87,28 +87,28 @@ namespace QM
 
 
     Term::
-    Term(size_t size, BitArray term)
-        :_numberOfOne(0),
+    Term(size_t size, bit_array term)
+        :_number_of_setbit(0),
          _checked(true),
          _size(size),
          _bitArray(term),
          _xMask(0),
          _result(0)
     {
-        BitArray end = 1 << size;
-        for(BitArray it = 1; it != end; it <<= 1)
+        bit_array end = 1 << size;
+        for(bit_array it = 1; it != end; it <<= 1)
         {
             if(_bitArray & it)
-                ++_numberOfOne;
+                ++_number_of_setbit;
         }
         _minTerm.push_back(term);
     }
 
 
     Term::
-    Term(Term<BitArray> const& first,  Term<BitArray> const& second,
-	 BitArray mask)
-	:_numberOfOne(first._numberOfOne),
+    Term(Term const& first,  Term const& second,
+	 bit_array mask)
+	:_number_of_setbit(first._number_of_setbit),
 	 _checked(true),
 	 _size(first._size),
 	 _bitArray(first._bitArray),
@@ -125,7 +125,7 @@ namespace QM
 
     bool
     Term::
-    isGrayAdjacent(Term<BitArray> &other)
+    isGrayAdjacent(Term &other)
     {
         // X, don't care bits must be equal in order to be gray adjacent
         // comparing them first is a short-circuit optimization
@@ -141,7 +141,7 @@ namespace QM
 
     Term
     Term::
-    getGroupedTerm(Term<BitArray> &other) 
+    getGroupedTerm(Term &other) 
     {
         this->_checked = false;
         other._checked = false;
@@ -155,7 +155,7 @@ namespace QM
     Term::
     getSetBitNum() const
     {
-        return _numberOfOne;
+        return _number_of_setbit;
     }
 
     bool
@@ -192,7 +192,7 @@ namespace QM
         return _bitArray < other._bitArray;
     }
 
-    std::vector<BitArray> const&
+    std::vector<bit_array> const&
     Term::
     getMinterms() const
     {
@@ -210,7 +210,7 @@ namespace QM
         // unset bits correspond to a negative boolean term
         for(auto i = 1; i < static_cast<int>(_size + 1); ++i)
         {
-            BitArray mask = 1 << (_size - 1);
+            bit_array mask = 1 << (_size - 1);
             mask = mask >> (i - 1);
 
             // x, don't care bit

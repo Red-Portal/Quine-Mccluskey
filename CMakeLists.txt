@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 project(QuineMccluskeyExample)
-
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -10,13 +9,7 @@ else()
 	set(CMAKE_CXX_FLAGS "-pthread -Wall -O3")
 endif()
 
-# header only library dependency (boost dynamic_bitset)
-add_library(dynamic_bitset INTERFACE)
-target_include_directories(dynamic_bitset INTERFACE include/dynamic_bitset/include/)
-
-# header only libary dependency (boost config)
-add_library(dynamic_bitset INTERFACE)
-target_include_directories(boost_config INTERFACE include/boost_config/include/)
+set(BOOST_INCLUDEDIR ~/libraries/boost)
 
 # header only library
 add_library(QuineMccluskey INTERFACE)
@@ -28,5 +21,18 @@ set(EXAMPLES ${PROJECT_SOURCE_DIR}/examples)
 set(SOURCE_FILES
   ${EXAMPLES}/main.cpp) 
 
-add_executable(QuineMccluskeyExample ${SOURCE_FILES})
-target_link_libraries(QuineMccluskeyExample dynamic_bitset QuineMccluskey)
+
+# Boost dependency
+set(Boost_USE_STATIC_LIBS OFF)
+find_package(Boost 1.64.0 REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS REQUIRED)
+
+if(Boost_FOUND)
+  message("found BOOST: " ${BOOST_ROOT})
+  include_directories(${Boost_INCLUDE_DIR})
+  add_executable(QuineMccluskeyExample ${SOURCE_FILES})
+  #target_link_libraries(QuineMccluskeyExample Boost::exception)
+else()
+  message("couldn't find boost")
+endif()
+
