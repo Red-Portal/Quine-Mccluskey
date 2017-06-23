@@ -1,10 +1,15 @@
 # Quine-Mccluskey Boolean Function Reducer
+
+## Current version is under refactoring. IT DOESN'T WORK
+
 ## Introduction
 Quine-Mccluskey algorithm C++ implementation.
 
 ## How to use
 
 ```c++
+#include "QM.hpp"
+
 auto reducer = QM::Reducer<uT>{inputSize, minTerms, dontCareTerms};
 auto result = reducer.getBooleanfunction();
 ```
@@ -19,14 +24,23 @@ Because this implementation uses bit masking/shifting.
 * The integer is the input number.
 * Negative integer values are negative inputs.
 
-* A B C  =  1  2  3
-* A'B'C  = -1 -2 -3
-* B C D' =  2  3 -4
+```
+ A B C  is represented as  1  2  3
+ A'B'C  is represented as -1 -2 -3
+ B C D' is represented as  2  3 -4
+```
+
+## Dependency
+
+* boost libraries
+
+This library currently uses boost::dynamic_bitset.
+No boost static library dependencies.
+Thus only boost headers are required.
+Because of boost cross-dependency, I recommend providing all of boost.
+
 
 ## TODO
 
-* msvc support 
-  msvc currently has problems with auto return type deduction
-* use boot::dynamic_bitset instead of user provided bit array
 * further optimization 
 
